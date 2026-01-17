@@ -73,7 +73,11 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: uploading ? context.l10n.uploadAnalyzingLabel : context.l10n.uploadHydrateCta,
+            label: uploading
+                ? context.l10n.uploadAnalyzingLabel
+                : hasPremium
+                    ? context.l10n.uploadHydrateCta
+                    : context.l10n.uploadLockedCta,
             icon: Icons.upload,
             disabled: uploading,
             onPressed: () async {
@@ -146,6 +150,25 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               ],
             ),
           ),
+          if (!hasPremium) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Pill(
+                  label: context.l10n.premiumLockedLabel,
+                  icon: Icons.lock_outline,
+                  variant: PillVariant.warn,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.l10n.premiumUnlockHelper(context.l10n.paywallFeaturePersonalization),
+                    style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           _Field(
             label: context.l10n.uploadRoleLabel,

@@ -111,6 +111,14 @@ class _TopBar extends ConsumerWidget {
           Row(
             children: [
               if (right != null) right!,
+              Padding(
+                padding: EdgeInsets.only(left: right != null ? 8 : 0),
+                child: Pill(
+                  label: hasPremium ? context.l10n.planPremiumLabel : context.l10n.planFreeLabel,
+                  icon: hasPremium ? Icons.workspace_premium : Icons.lock_outline,
+                  variant: hasPremium ? PillVariant.success : PillVariant.muted,
+                ),
+              ),
               if (!hasPremium && route != AppRoute.paywall && route != AppRoute.premium)
                 Padding(
                   padding: const EdgeInsets.only(left: 8),

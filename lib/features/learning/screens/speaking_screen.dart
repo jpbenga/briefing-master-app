@@ -13,6 +13,7 @@ import '../../../core/ui/pills.dart';
 import '../../../core/ui/progress.dart';
 import '../../../core/ui/screen_shell.dart';
 import '../../../core/ui/toasts.dart';
+import '../../../core/ui/what_to_do_card.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/learning/learning_content_resolver.dart';
 import '../../monetization/logic/entitlements.dart';
@@ -175,6 +176,15 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                 ),
               ),
               const SizedBox(height: 12),
+              WhatToDoCard(
+                title: context.l10n.whatToDoTitle,
+                steps: [
+                  context.l10n.speakingWhatToDoStep1,
+                  context.l10n.speakingWhatToDoStep2,
+                  context.l10n.speakingWhatToDoStep3,
+                ],
+              ),
+              const SizedBox(height: 12),
               AppCard(
                 backgroundColor: AppTokens.surfaceGlass,
                 child: Column(
@@ -279,6 +289,25 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                         ),
                       ],
                     ),
+                    if (!hasPremium) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Pill(
+                            label: context.l10n.premiumLockedLabel,
+                            icon: Icons.lock_outline,
+                            variant: PillVariant.warn,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              context.l10n.premiumUnlockHelper(context.l10n.paywallFeatureTier3LiveCoach),
+                              style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -344,6 +373,11 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                     const SizedBox(height: 6),
                     Text(
                       context.l10n.speakingScoreExplanation,
+                      style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      context.l10n.speakingExampleSentence,
                       style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                     ),
                   ],
@@ -435,12 +469,12 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                                   );
                                   ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
                                 },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(AppTokens.radiusMd),
-                                    ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                                  ),
                                   child: Text(
                                     context.l10n.unlockLabel,
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.zinc950),
