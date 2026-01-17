@@ -8,6 +8,7 @@ import '../dynamic_content/dynamic_i18n_models.dart';
 import '../dynamic_content/dynamic_i18n_provider.dart';
 import '../i18n/learning_locale_provider.dart';
 import 'language_catalog.dart';
+import 'learning_language.dart';
 import '../ui/toasts.dart';
 
 class LearningClusterContent {
@@ -548,54 +549,6 @@ const Map<String, String> _battleCardTemplate = {
       'Em resumo: {metric}. Identificamos os principais fatores e estamos executando um plano de mitigação. Minha recomendação é estabilizar a tendência em 2 semanas, preservando a confiança do cliente. Confirmarei ações corretivas e um cronograma revisado dentro de uma hora.',
   'de':
       'Net-net: {metric}. Wir haben die Haupttreiber identifiziert und setzen jetzt einen Minderungsplan um. Meine Empfehlung ist, den Trend innerhalb von 2 Wochen zu stabilisieren und das Kundenvertrauen zu wahren. Ich bestätige Korrekturmaßnahmen und einen revidierten Zeitplan innerhalb einer Stunde.',
-};
-
-const Map<String, String> _quizTimesUpMessage = {
-  'en': 'Time’s up. Executive clarity requires speed under pressure.',
-  'fr': 'Temps écoulé. La clarté exécutive exige de la vitesse sous pression.',
-  'es': 'Se acabó el tiempo. La claridad ejecutiva exige rapidez bajo presión.',
-  'pt': 'Tempo esgotado. Clareza executiva exige velocidade sob pressão.',
-  'de': 'Die Zeit ist um. Executive-Klarheit braucht Tempo unter Druck.',
-};
-
-const Map<String, String> _quizTimesUpHaptic = {
-  'en': 'hesitation',
-  'fr': 'hésitation',
-  'es': 'duda',
-  'pt': 'hesitação',
-  'de': 'zögern',
-};
-
-const Map<String, String> _quizCorrectMessage = {
-  'en': 'Correct. Executive-grade synonym mapping detected.',
-  'fr': 'Correct. Cartographie de synonymes de niveau exécutif détectée.',
-  'es': 'Correcto. Mapeo de sinónimos de nivel ejecutivo detectado.',
-  'pt': 'Correto. Mapeamento de sinônimos nível executivo detectado.',
-  'de': 'Richtig. Executive-taugliche Synonymzuordnung erkannt.',
-};
-
-const Map<String, String> _quizCorrectHaptic = {
-  'en': 'correct',
-  'fr': 'correct',
-  'es': 'correcto',
-  'pt': 'correto',
-  'de': 'korrekt',
-};
-
-const Map<String, String> _quizNotQuiteMessage = {
-  'en': 'Not quite. Aim for connectors + measurable commitments.',
-  'fr': 'Pas encore. Visez des connecteurs + des engagements mesurables.',
-  'es': 'No del todo. Apunta a conectores + compromisos medibles.',
-  'pt': 'Ainda não. Busque conectores + compromissos mensuráveis.',
-  'de': 'Noch nicht. Setze auf Konnektoren + messbare Zusagen.',
-};
-
-const Map<String, String> _quizNotQuiteHaptic = {
-  'en': 'hesitation',
-  'fr': 'hésitation',
-  'es': 'duda',
-  'pt': 'hesitação',
-  'de': 'zögern',
 };
 
 const List<_CoachTipData> _coachTips = [

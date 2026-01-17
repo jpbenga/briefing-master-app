@@ -11,7 +11,7 @@ import '../core/ui/transitions.dart';
 import '../core/i18n/app_locales.dart';
 import '../core/i18n/l10n_ext.dart';
 import '../core/i18n/ui_locale_provider.dart';
-import '../l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../features/ftue/screens/onboarding_screen.dart';
 import '../features/ftue/screens/upload_screen.dart';
 import '../features/ftue/screens/welcome_screen.dart';

@@ -13,6 +13,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/ui_locale_provider.dart';
 import '../../../core/i18n/learning_locale_provider.dart';
 import '../../../core/learning/language_catalog.dart';
+import '../../../core/learning/learning_language.dart';
 
 class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
@@ -85,7 +86,7 @@ class WelcomeScreen extends ConsumerWidget {
                               color: AppTokens.textPrimary,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             context.l10n.welcomeHeroSubtitle,
                             style: TextStyle(fontSize: 12, color: AppTokens.textSecondary),

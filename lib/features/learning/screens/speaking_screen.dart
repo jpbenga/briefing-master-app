@@ -85,7 +85,6 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(userProfileProvider);
     final hasPremium = ref.watch(hasPremiumProvider);
     final resolver = ref.watch(learningContentResolverProvider);
 

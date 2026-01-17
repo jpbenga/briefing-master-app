@@ -109,7 +109,7 @@ class _OnboardingGrid extends StatelessWidget {
                 body: context.l10n.onboardingCardCoachBody,
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: _OnboardCard(
                 icon: Icons.bar_chart_outlined,
@@ -119,7 +119,7 @@ class _OnboardingGrid extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -129,7 +129,7 @@ class _OnboardingGrid extends StatelessWidget {
                 body: context.l10n.onboardingCardHookBody,
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: _OnboardCard(
                 icon: Icons.verified_user_outlined,
