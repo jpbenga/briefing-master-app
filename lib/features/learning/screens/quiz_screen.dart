@@ -12,8 +12,10 @@ import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/progress.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/ui/what_to_do_card.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/learning/learning_content_resolver.dart';
+import '../../monetization/logic/entitlements.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key});
@@ -148,6 +150,34 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ),
           ),
           const SizedBox(height: 12),
+          WhatToDoCard(
+            title: context.l10n.whatToDoTitle,
+            steps: [
+              context.l10n.quizWhatToDoStep1,
+              context.l10n.quizWhatToDoStep2,
+              context.l10n.quizWhatToDoStep3,
+            ],
+          ),
+          if (!ref.watch(hasPremiumProvider)) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Pill(
+                  label: context.l10n.premiumLockedLabel,
+                  icon: Icons.lock_outline,
+                  variant: PillVariant.warn,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.l10n.premiumUnlockHelper(context.l10n.paywallFeatureCompetencyMapPricing),
+                    style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
           AppCard(
             backgroundColor: AppTokens.surfaceGlass,
             child: Column(
@@ -239,6 +269,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         ),
                       ),
                       style: const TextStyle(fontSize: 13, color: AppTokens.textPrimary, height: 1.4),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      context.l10n.quizExampleSentence,
+                      style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                     ),
                   ],
                 ),

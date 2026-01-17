@@ -9,8 +9,10 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/ui/what_to_do_card.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/learning/learning_content_resolver.dart';
+import '../../monetization/logic/entitlements.dart';
 
 class RevisionScreen extends ConsumerWidget {
   const RevisionScreen({super.key});
@@ -74,6 +76,34 @@ class RevisionScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          WhatToDoCard(
+            title: context.l10n.whatToDoTitle,
+            steps: [
+              context.l10n.revisionWhatToDoStep1,
+              context.l10n.revisionWhatToDoStep2,
+              context.l10n.revisionWhatToDoStep3,
+            ],
+          ),
+          if (!ref.watch(hasPremiumProvider)) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Pill(
+                  label: context.l10n.premiumLockedLabel,
+                  icon: Icons.lock_outline,
+                  variant: PillVariant.warn,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.l10n.premiumUnlockHelper(context.l10n.paywallFeatureCompetencyMapPricing),
+                    style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           AppCard(
             backgroundColor: AppTokens.surfaceGlass,

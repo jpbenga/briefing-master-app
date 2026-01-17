@@ -9,6 +9,7 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/ui/what_to_do_card.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/learning/learning_content_resolver.dart';
 import '../widgets/flip_card.dart';
@@ -92,6 +93,15 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 12),
+          WhatToDoCard(
+            title: context.l10n.whatToDoTitle,
+            steps: [
+              context.l10n.primingWhatToDoStep1,
+              context.l10n.primingWhatToDoStep2,
+              context.l10n.primingWhatToDoStep3,
+            ],
           ),
           const SizedBox(height: 12),
           AppCard(
