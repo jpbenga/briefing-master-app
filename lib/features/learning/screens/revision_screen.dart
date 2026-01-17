@@ -9,6 +9,8 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/learning/learning_content_resolver.dart';
 
 class RevisionScreen extends ConsumerWidget {
   const RevisionScreen({super.key});
@@ -16,21 +18,21 @@ class RevisionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider);
-    final template =
-        'Net-net: ${profile.dashboardMetric}. We’ve identified the primary drivers, and we’re executing a mitigation plan now. My recommendation is to stabilize the trend within 2 weeks, while preserving customer trust. I’ll confirm corrective actions and a revised timeline within the hour.';
+    final resolver = ref.watch(learningContentResolverProvider);
+    final template = resolver.battleCardTemplate();
 
     return ScreenShell(
-      title: 'Battle Card',
+      title: context.l10n.revisionTitle,
       left: const BackButtonWidget(),
-      right: const Pill(label: 'Stage 4/4', icon: Icons.workspace_premium, variant: PillVariant.success),
+      right: Pill(label: context.l10n.stageLabel(4, 4), icon: Icons.workspace_premium, variant: PillVariant.success),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Unlock Competency Map',
+            label: context.l10n.revisionUnlockCompetencyMap,
             icon: Icons.lock_outline,
             onPressed: () {
-              ref.read(paywallIntentProvider.notifier).state = const PaywallIntent(
-                feature: 'Competency Map + Pricing',
+              ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
+                feature: context.l10n.paywallFeatureCompetencyMapPricing,
                 from: AppRoute.revision,
               );
               ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
@@ -38,7 +40,7 @@ class RevisionScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'Preview Premium Experience',
+            label: context.l10n.revisionPreviewPremium,
             icon: Icons.arrow_forward,
             onPressed: () => ref.read(appRouteProvider.notifier).goTo(AppRoute.premium),
           ),
@@ -54,17 +56,20 @@ class RevisionScreen extends ConsumerWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Mission-ready anchor', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
-                SizedBox(height: 4),
+              children: [
                 Text(
-                  'Your executive briefing — in one card.',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.revisionMissionReadyLabel,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
-                  'This is your “meeting cheat sheet.” It compresses clarity + tone + commitment.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.revisionBriefingTitle,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.revisionBriefingBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -81,7 +86,10 @@ class RevisionScreen extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Context', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+                        Text(
+                          context.l10n.revisionContextLabel,
+                          style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           '${profile.role} @ ${profile.company}',
@@ -90,20 +98,20 @@ class RevisionScreen extends ConsumerWidget {
                       ],
                     ),
                     Pill(
-                      label: profile.hydrated ? 'Hydrated' : 'Demo',
+                      label: profile.hydrated ? context.l10n.hydratedBadgeLabel : context.l10n.demoBadgeLabel,
                       icon: Icons.verified_user_outlined,
                       variant: profile.hydrated ? PillVariant.success : PillVariant.warn,
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Row(
+                Row(
                   children: [
-                    Expanded(child: _MiniMetric(label: 'Clarity', value: '82')),
-                    SizedBox(width: 8),
-                    Expanded(child: _MiniMetric(label: 'Tone', value: '76')),
-                    SizedBox(width: 8),
-                    Expanded(child: _MiniMetric(label: 'Commitment', value: '88')),
+                    Expanded(child: _MiniMetric(label: context.l10n.metricClarityLabel, value: '82')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MiniMetric(label: context.l10n.metricToneLabel, value: '76')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MiniMetric(label: context.l10n.metricCommitmentLabel, value: '88')),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -117,9 +125,9 @@ class RevisionScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Prefilled executive template (RAG-aware)',
-                        style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                      Text(
+                        context.l10n.revisionPrefilledTemplateLabel,
+                        style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -139,10 +147,10 @@ class RevisionScreen extends ConsumerWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(AppTokens.radiusMd),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            'Export cheat sheet',
-                            style: TextStyle(fontWeight: FontWeight.w600, color: AppTokens.zinc950),
+                            context.l10n.revisionExportCheatSheet,
+                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppTokens.zinc950),
                           ),
                         ),
                       ),
@@ -156,10 +164,10 @@ class RevisionScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(AppTokens.radiusMd),
                           border: Border.all(color: AppTokens.borderLight),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            'Practice again',
-                            style: TextStyle(fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                            context.l10n.revisionPracticeAgain,
+                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                           ),
                         ),
                       ),
@@ -167,9 +175,9 @@ class RevisionScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Haptic simulation: ✔ subtle confirmation pulse on export.',
-                  style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                Text(
+                  context.l10n.revisionHapticSimulation,
+                  style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                 ),
               ],
             ),
@@ -181,17 +189,17 @@ class RevisionScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [Color(0x14000000), Color(0x00000000)],
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Retention loop',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.revisionRetentionLoopTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Reward (executive rewrite) → investment (save/export) → habit (streak) → LTV.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.revisionRetentionLoopBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),

@@ -10,6 +10,7 @@ import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/progress.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
 import '../logic/entitlements.dart';
 
 class PaywallScreen extends ConsumerWidget {
@@ -19,7 +20,7 @@ class PaywallScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final intent = ref.watch(paywallIntentProvider);
     final origin = intent?.from ?? AppRoute.priming;
-    final feature = intent?.feature ?? 'Premium features';
+    final feature = intent?.feature ?? context.l10n.paywallDefaultFeature;
 
     void completePurchase(PlanType plan) {
       ref.read(planProvider.notifier).state = plan;
@@ -28,63 +29,63 @@ class PaywallScreen extends ConsumerWidget {
     }
 
     final map = [
-      {'skill': 'Tone authority', 'l1': 42.0, 'l3': 86.0},
-      {'skill': 'Structured briefing', 'l1': 48.0, 'l3': 90.0},
-      {'skill': 'Metrics storytelling', 'l1': 39.0, 'l3': 84.0},
-      {'skill': 'Handling objections', 'l1': 36.0, 'l3': 82.0},
+      {'skill': context.l10n.paywallSkillToneAuthority, 'l1': 42.0, 'l3': 86.0},
+      {'skill': context.l10n.paywallSkillStructuredBriefing, 'l1': 48.0, 'l3': 90.0},
+      {'skill': context.l10n.paywallSkillMetricsStorytelling, 'l1': 39.0, 'l3': 84.0},
+      {'skill': context.l10n.paywallSkillHandlingObjections, 'l1': 36.0, 'l3': 82.0},
     ];
 
     final plans = [
       _PlanCardData(
-        tag: 'Free',
-        title: 'Starter',
-        price: '€0',
-        cadence: 'forever',
+        tag: context.l10n.paywallPlanTagFree,
+        title: context.l10n.paywallPlanStarterTitle,
+        price: context.l10n.paywallPlanStarterPrice,
+        cadence: context.l10n.paywallCadenceForever,
         highlight: false,
         perks: [
-          '1 scenario (Self-intro)',
-          'Tier 1→2 suggestions',
-          'Basic synonym quiz',
-          'Limited streak tracking',
+          context.l10n.paywallStarterPerkScenario,
+          context.l10n.paywallStarterPerkTierSuggestions,
+          context.l10n.paywallStarterPerkQuiz,
+          context.l10n.paywallStarterPerkStreaks,
         ],
-        cta: 'Keep training (Free)',
+        cta: context.l10n.paywallStarterCta,
         onSelect: () => completePurchase(PlanType.free),
       ),
       _PlanCardData(
-        tag: 'Most Popular',
-        title: 'Premium',
-        price: '€12.99',
-        cadence: '/month',
+        tag: context.l10n.paywallPlanTagPopular,
+        title: context.l10n.paywallPlanPremiumTitle,
+        price: context.l10n.paywallPlanPremiumPrice,
+        cadence: context.l10n.paywallCadenceMonthly,
         highlight: true,
         perks: [
-          'Full briefing library (Crisis, Standups, Negotiation)',
-          'Real-time coach (streaming tips)',
-          'Dashboard OCR + RAG personalization',
-          'Tier 3 executive rewrites',
-          'SRS mastery scheduling',
+          context.l10n.paywallPremiumPerkLibrary,
+          context.l10n.paywallPremiumPerkCoach,
+          context.l10n.paywallPremiumPerkPersonalization,
+          context.l10n.paywallPremiumPerkTier3,
+          context.l10n.paywallPremiumPerkSrs,
         ],
-        cta: 'Unlock Premium',
+        cta: context.l10n.paywallPremiumCta,
         onSelect: () => completePurchase(PlanType.premium),
       ),
       _PlanCardData(
-        tag: 'One-shot',
-        title: 'Crisis Sprint Pack',
-        price: '€19.99',
-        cadence: 'one-time',
+        tag: context.l10n.paywallPlanTagOneShot,
+        title: context.l10n.paywallPlanSprintTitle,
+        price: context.l10n.paywallPlanSprintPrice,
+        cadence: context.l10n.paywallCadenceOneTime,
         highlight: false,
         perks: [
-          '7-day high-pressure sprint',
-          'Executive rewrite templates',
-          'Rapid quiz drills',
-          'Interview/Crisis variants',
+          context.l10n.paywallSprintPerkDays,
+          context.l10n.paywallSprintPerkTemplates,
+          context.l10n.paywallSprintPerkDrills,
+          context.l10n.paywallSprintPerkVariants,
         ],
-        cta: 'Buy Sprint Pack',
+        cta: context.l10n.paywallSprintCta,
         onSelect: () => completePurchase(PlanType.sprint),
       ),
     ];
 
     return ScreenShell(
-      title: 'Paywall',
+      title: context.l10n.paywallTitle,
       left: const BackButtonWidget(),
       right: GestureDetector(
         onTap: () => completePurchase(PlanType.premium),
@@ -95,11 +96,14 @@ class PaywallScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(AppTokens.radiusMd),
             border: Border.all(color: const Color(0x33F59E0B)),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.workspace_premium, size: 16, color: Color(0xFFFDE68A)),
-              SizedBox(width: 6),
-              Text('Upgrade', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFFDE68A))),
+              const Icon(Icons.workspace_premium, size: 16, color: Color(0xFFFDE68A)),
+              const SizedBox(width: 6),
+              Text(
+                context.l10n.upgradeLabel,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFFDE68A)),
+              ),
             ],
           ),
         ),
@@ -107,13 +111,13 @@ class PaywallScreen extends ConsumerWidget {
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Unlock Premium',
+            label: context.l10n.paywallUnlockPremiumCta,
             icon: Icons.workspace_premium,
             onPressed: () => completePurchase(PlanType.premium),
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'Not now',
+            label: context.l10n.notNowLabel,
             onPressed: () => ref.read(appRouteProvider.notifier).goTo(origin),
           ),
         ],
@@ -129,21 +133,21 @@ class PaywallScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Paywall • Unlock', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
+                Text(context.l10n.paywallUnlockLabel, style: const TextStyle(fontSize: 12, color: AppTokens.textMuted)),
                 const SizedBox(height: 4),
                 Text(
-                  'Feature requested: $feature',
+                  context.l10n.paywallFeatureRequested(feature),
                   style: const TextStyle(fontSize: 12, color: Color(0xFFFDE68A)),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Every Tier 1 meeting costs authority.',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                Text(
+                  context.l10n.paywallHeroTitle,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Don’t just “speak English.” Speak leadership. Unlock Tier 3 language, live coaching, and personalized scenarios from your real metrics.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                Text(
+                  context.l10n.paywallHeroBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -155,26 +159,32 @@ class PaywallScreen extends ConsumerWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Your current level', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-                        SizedBox(height: 2),
                         Text(
-                          'Tier 1–2 (inconsistent)',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          context.l10n.paywallCurrentLevelLabel,
+                          style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.paywallCurrentLevelValue,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Target requirement', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-                        SizedBox(height: 2),
                         Text(
-                          'Tier 3 (executive)',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          context.l10n.paywallTargetRequirementLabel,
+                          style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.paywallTargetRequirementValue,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -203,7 +213,10 @@ class PaywallScreen extends ConsumerWidget {
                                       row['skill'] as String,
                                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                                     ),
-                                    const Text('L1→L3', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+                                    Text(
+                                      context.l10n.paywallL1L3Label,
+                                      style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
@@ -213,7 +226,10 @@ class PaywallScreen extends ConsumerWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Text('Current', style: TextStyle(fontSize: 10, color: AppTokens.textMuted)),
+                                          Text(
+                                            context.l10n.paywallCurrentLabel,
+                                            style: const TextStyle(fontSize: 10, color: AppTokens.textMuted),
+                                          ),
                                           const SizedBox(height: 4),
                                           ProgressBarWidget(value: row['l1'] as double),
                                         ],
@@ -224,7 +240,10 @@ class PaywallScreen extends ConsumerWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Text('Required', style: TextStyle(fontSize: 10, color: AppTokens.textMuted)),
+                                          Text(
+                                            context.l10n.paywallRequiredLabel,
+                                            style: const TextStyle(fontSize: 10, color: AppTokens.textMuted),
+                                          ),
                                           const SizedBox(height: 4),
                                           ProgressBarWidget(value: row['l3'] as double),
                                         ],
@@ -233,9 +252,9 @@ class PaywallScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  'Loss aversion: every meeting at Tier 1 leaks credibility.',
-                                  style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                                Text(
+                                  context.l10n.paywallLossAversionNote,
+                                  style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                                 ),
                               ],
                             ),
@@ -259,30 +278,30 @@ class PaywallScreen extends ConsumerWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Choose your upgrade',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                          context.l10n.paywallChooseUpgradeTitle,
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Pricing built to maximize activation + LTV.',
-                          style: TextStyle(fontSize: 12, color: AppTokens.textSecondary),
+                          context.l10n.paywallChooseUpgradeBody,
+                          style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary),
                         ),
                       ],
                     ),
-                    Pill(label: 'Pricing', icon: Icons.workspace_premium, variant: PillVariant.muted),
+                    Pill(label: context.l10n.paywallPricingLabel, icon: Icons.workspace_premium, variant: PillVariant.muted),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Column(children: plans.map(_PlanCard.new).toList()),
                 const SizedBox(height: 8),
-                const Text(
-                  'Secure purchase flow (placeholder). In production: Stripe / RevenueCat + Supabase entitlements.',
-                  style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                Text(
+                  context.l10n.paywallPurchaseNote,
+                  style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                 ),
               ],
             ),
@@ -296,47 +315,47 @@ class PaywallScreen extends ConsumerWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'Premium unlocks',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.paywallPremiumUnlocksTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: _Benefit(
                         icon: Icons.workspace_premium,
-                        title: 'Full briefing library',
-                        body: 'Crisis, standups, negotiations, leadership updates.',
+                        title: context.l10n.paywallBenefitLibraryTitle,
+                        body: context.l10n.paywallBenefitLibraryBody,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: _Benefit(
                         icon: Icons.upload_file_outlined,
-                        title: 'Dashboard OCR + RAG',
-                        body: 'Scenarios built from your real metrics.',
+                        title: context.l10n.paywallBenefitDashboardTitle,
+                        body: context.l10n.paywallBenefitDashboardBody,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: _Benefit(
                         icon: Icons.mic,
-                        title: 'Live coach',
-                        body: 'Streaming feedback with executive polish.',
+                        title: context.l10n.paywallBenefitCoachTitle,
+                        body: context.l10n.paywallBenefitCoachBody,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: _Benefit(
                         icon: Icons.bolt,
-                        title: 'Retention engine',
-                        body: 'Streaks, SRS mastery, role-based packs.',
+                        title: context.l10n.paywallBenefitRetentionTitle,
+                        body: context.l10n.paywallBenefitRetentionBody,
                       ),
                     ),
                   ],
@@ -490,11 +509,11 @@ class _PlanCard extends StatelessWidget {
                 .toList(),
           ),
           if (data.highlight)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '★ Best value: unlock Tier 3 rewrites + real-time coaching + personalization.',
-                style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                context.l10n.paywallBestValueNote,
+                style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
               ),
             ),
         ],

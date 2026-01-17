@@ -9,6 +9,7 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
@@ -18,19 +19,19 @@ class OnboardingScreen extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
 
     return ScreenShell(
-      title: 'Onboarding',
+      title: context.l10n.onboardingTitle,
       left: const BackButtonWidget(),
-      right: const Pill(label: 'FTUE', icon: Icons.layers_outlined),
+      right: Pill(label: context.l10n.ftueLabel, icon: Icons.layers_outlined),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Personalize (CV / Dashboard)',
+            label: context.l10n.onboardingPersonalizeCta,
             icon: Icons.arrow_forward,
             onPressed: () => ref.read(appRouteProvider.notifier).goTo(AppRoute.upload),
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'Skip personalization (demo)',
+            label: context.l10n.onboardingSkipPersonalization,
             onPressed: () {
               ref.read(userProfileProvider.notifier).state = profile.copyWith(hydrated: false);
               ref.read(appRouteProvider.notifier).goTo(AppRoute.priming);
@@ -44,17 +45,20 @@ class OnboardingScreen extends ConsumerWidget {
             backgroundColor: AppTokens.surfaceGlass,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Your mission', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
-                SizedBox(height: 6),
+              children: [
                 Text(
-                  'Sound credible under pressure — without overthinking.',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.onboardingMissionLabel,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'We build a neural shortcut: your brain learns executive phrasing as a reflex.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.onboardingMissionTitle,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.onboardingMissionBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -70,15 +74,15 @@ class OnboardingScreen extends ConsumerWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'Endowment Effect',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.onboardingEndowmentTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Uploading your CV/dashboard makes the product feel already “yours.” Your brain values what it invests in — leading to higher activation and LTV.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.onboardingEndowmentBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -94,23 +98,23 @@ class _OnboardingGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           children: [
             Expanded(
               child: _OnboardCard(
                 icon: Icons.forum_outlined,
-                title: 'Real-time coach',
-                body: 'Streaming feedback while you speak — tone, structure, fillers.',
+                title: context.l10n.onboardingCardCoachTitle,
+                body: context.l10n.onboardingCardCoachBody,
               ),
             ),
             SizedBox(width: 8),
             Expanded(
               child: _OnboardCard(
                 icon: Icons.bar_chart_outlined,
-                title: 'Sophistication Score',
-                body: 'No binary grading. We measure executive polish + clarity.',
+                title: context.l10n.onboardingCardScoreTitle,
+                body: context.l10n.onboardingCardScoreBody,
               ),
             ),
           ],
@@ -121,16 +125,16 @@ class _OnboardingGrid extends StatelessWidget {
             Expanded(
               child: _OnboardCard(
                 icon: Icons.bolt_outlined,
-                title: 'Hook Model',
-                body: 'Triggers → action → reward → investment → retention loop.',
+                title: context.l10n.onboardingCardHookTitle,
+                body: context.l10n.onboardingCardHookBody,
               ),
             ),
             SizedBox(width: 8),
             Expanded(
               child: _OnboardCard(
                 icon: Icons.verified_user_outlined,
-                title: 'Private by design',
-                body: 'Your documents are isolated via RLS (multi-tenant security).',
+                title: context.l10n.onboardingCardPrivateTitle,
+                body: context.l10n.onboardingCardPrivateBody,
               ),
             ),
           ],

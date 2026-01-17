@@ -9,8 +9,9 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/learning/learning_content_resolver.dart';
 import '../widgets/flip_card.dart';
-import 'learning_data.dart';
 
 class PrimingScreen extends ConsumerStatefulWidget {
   const PrimingScreen({super.key});
@@ -20,21 +21,23 @@ class PrimingScreen extends ConsumerStatefulWidget {
 }
 
 class _PrimingScreenState extends ConsumerState<PrimingScreen> {
-  String cluster = 'Sharing bad news';
+  String cluster = LearningClusters.sharingBadNews;
 
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
-    final pool = semanticPools[cluster]!;
+    final resolver = ref.watch(learningContentResolverProvider);
+    final pool = resolver.clusterContent(cluster);
+    final scenario = resolver.scenarioForCluster(cluster);
 
     return ScreenShell(
-      title: 'Cognitive Priming',
+      title: context.l10n.primingTitle,
       left: const BackButtonWidget(),
-      right: const Pill(label: 'Stage 1/4', icon: Icons.auto_awesome, variant: PillVariant.muted),
+      right: Pill(label: context.l10n.stageLabel(1, 4), icon: Icons.auto_awesome, variant: PillVariant.muted),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Enter Focus Mode (Speaking)',
+            label: context.l10n.primingEnterFocusMode,
             icon: Icons.mic,
             onPressed: () {
               ref.read(modeProvider.notifier).state = AppMode.adrenaline;
@@ -43,7 +46,7 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'Skip to Quiz (demo)',
+            label: context.l10n.primingSkipToQuiz,
             icon: Icons.arrow_forward,
             onPressed: () {
               ref.read(modeProvider.notifier).state = AppMode.focus;
@@ -63,15 +66,15 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Scenario', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
+                      Text(context.l10n.scenarioLabel, style: const TextStyle(fontSize: 12, color: AppTokens.textMuted)),
                       const SizedBox(height: 4),
                       Text(
-                        baseScenario['title']!,
+                        resolver.scenarioTitle(scenario),
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        baseScenario['description']!,
+                        resolver.scenarioDescription(scenario),
                         style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                       ),
                     ],
@@ -105,18 +108,21 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Intent cluster', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
+                        Text(
+                          context.l10n.intentClusterLabel,
+                          style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
+                        ),
                         const SizedBox(height: 4),
                         Text(
-                          cluster,
+                          resolver.clusterLabel(cluster),
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                     DropdownButton<String>(
                       value: cluster,
-                      items: semanticPools.keys
-                          .map((key) => DropdownMenuItem(value: key, child: Text(key)))
+                      items: resolver.availableClusters()
+                          .map((key) => DropdownMenuItem(value: key, child: Text(resolver.clusterLabel(key))))
                           .toList(),
                       dropdownColor: AppTokens.zinc900,
                       onChanged: (value) {
@@ -133,11 +139,11 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _PrimeCard(title: 'Power Verbs', items: List<String>.from(pool['powerVerbs'] as List)),
+                      child: _PrimeCard(title: context.l10n.powerVerbsLabel, items: pool.powerVerbs),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _PrimeCard(title: 'Connectors', items: List<String>.from(pool['connectors'] as List)),
+                      child: _PrimeCard(title: context.l10n.connectorsLabel, items: pool.connectors),
                     ),
                   ],
                 ),
@@ -151,41 +157,44 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Tri-tier vocabulary', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
-                        SizedBox(height: 2),
                         Text(
-                          'Flip cards to prime executive phrasing.',
-                          style: TextStyle(fontSize: 12, color: AppTokens.textSecondary),
+                          context.l10n.triTierVocabularyTitle,
+                          style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.triTierVocabularySubtitle,
+                          style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary),
                         ),
                       ],
                     ),
-                    Pill(label: 'Tiers', icon: Icons.layers_outlined),
+                    Pill(label: context.l10n.tiersLabel, icon: Icons.layers_outlined),
                   ],
                 ),
                 const SizedBox(height: 12),
                 FlipCardWidget(
-                  tier: 'Tier 1',
-                  subtitle: 'Safe / Functional',
-                  front: List<String>.from(pool['tier1'] as List).first,
-                  back: List<String>.from(pool['tier2'] as List).first,
+                  tier: context.l10n.tierLabel(1),
+                  subtitle: context.l10n.tier1Subtitle,
+                  front: pool.tier1.first,
+                  back: pool.tier2.first,
                 ),
                 const SizedBox(height: 8),
                 FlipCardWidget(
-                  tier: 'Tier 2',
-                  subtitle: 'Professional / Fluent',
-                  front: List<String>.from(pool['tier2'] as List)[1],
-                  back: List<String>.from(pool['tier3'] as List)[1],
+                  tier: context.l10n.tierLabel(2),
+                  subtitle: context.l10n.tier2Subtitle,
+                  front: pool.tier2[1],
+                  back: pool.tier3[1],
                 ),
                 const SizedBox(height: 8),
                 FlipCardWidget(
-                  tier: 'Tier 3',
-                  subtitle: 'Executive / Persuasive',
-                  front: List<String>.from(pool['tier3'] as List).first,
-                  back: 'Now commit: timeline + impact + mitigation.',
+                  tier: context.l10n.tierLabel(3),
+                  subtitle: context.l10n.tier3Subtitle,
+                  front: pool.tier3.first,
+                  back: resolver.tier3BackInstruction(),
                 ),
               ],
             ),
@@ -197,17 +206,17 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
               end: Alignment.bottomCenter,
               colors: [Color(0x1A06B6D4), Color(0x00000000)],
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Priming psychology',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.primingPsychologyTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'We reduce cognitive load by preloading patterns (verbs + connectors). This turns “thinking” into “reflex.” Better reflex → less anxiety → higher performance flow.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.primingPsychologyBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -216,7 +225,9 @@ class _PrimingScreenState extends ConsumerState<PrimingScreen> {
           Row(
             children: [
               Pill(
-                label: profile.hydrated ? 'Hydrated: ${profile.role}' : 'Not hydrated',
+                label: profile.hydrated
+                    ? context.l10n.hydratedLabel(profile.role)
+                    : context.l10n.notHydratedLabel,
                 icon: Icons.verified_user_outlined,
                 variant: profile.hydrated ? PillVariant.success : PillVariant.warn,
               ),

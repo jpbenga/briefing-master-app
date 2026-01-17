@@ -5,6 +5,7 @@ import '../../app/app_state.dart';
 import '../../core/routing/app_router.dart';
 import '../../core/routing/routes.dart';
 import '../../features/monetization/logic/entitlements.dart';
+import '../i18n/l10n_ext.dart';
 import '../theme/tokens.dart';
 import 'pills.dart';
 
@@ -73,6 +74,11 @@ class _TopBar extends ConsumerWidget {
     final mode = ref.watch(modeProvider);
     final route = ref.watch(currentRouteProvider);
     final hasPremium = ref.watch(hasPremiumProvider);
+    final modeLabel = switch (mode) {
+      AppMode.deepWork => context.l10n.modeDeepWork,
+      AppMode.adrenaline => context.l10n.modeAdrenaline,
+      AppMode.focus => context.l10n.modeFocus,
+    };
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -95,7 +101,7 @@ class _TopBar extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    'Mode: ${AppTokens.modes[mode]?.name}',
+                    context.l10n.modeLabel(modeLabel),
                     style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                   ),
                 ],
@@ -111,7 +117,7 @@ class _TopBar extends ConsumerWidget {
                   child: GestureDetector(
                     onTap: () {
                       ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
-                            feature: 'Upgrade to Premium',
+                            feature: context.l10n.paywallFeatureUpgrade,
                             from: route,
                           );
                       ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
@@ -127,10 +133,7 @@ class _TopBar extends ConsumerWidget {
                         children: [
                           Icon(Icons.lock_outline, size: 16, color: Color(0xFFFDE68A)),
                           SizedBox(width: 6),
-                          Text(
-                            'Upgrade',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFFDE68A)),
-                          ),
+                          _UpgradeLabel(),
                         ],
                       ),
                     ),
@@ -140,6 +143,18 @@ class _TopBar extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _UpgradeLabel extends StatelessWidget {
+  const _UpgradeLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      context.l10n.upgradeLabel,
+      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFFDE68A)),
     );
   }
 }

@@ -12,7 +12,8 @@ import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/progress.dart';
 import '../../../core/ui/screen_shell.dart';
-import 'learning_data.dart';
+import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/learning/learning_content_resolver.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key});
@@ -52,63 +53,48 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(userProfileProvider);
+    final resolver = ref.watch(learningContentResolverProvider);
+    final feedback = resolver.quizFeedback();
 
     if (timeLeft == 0 && result == null) {
       result = QuizResult(
         ok: false,
-        msg: 'Time’s up. Executive clarity requires speed under pressure.',
-        haptic: 'hesitation',
+        msg: feedback.timesUpMessage,
+        haptic: feedback.timesUpHaptic,
       );
       streak = 0;
       points = (points - 12).clamp(0, 999);
     }
 
-    final challenges = [
-      QuizChallenge(
-        cue: 'Upgrade: “I’m looking into it.”',
-        good: 'I’m investigating the root cause and will confirm corrective actions with a measurable ETA.',
-        synonyms: ['investigating', 'root cause', 'corrective actions', 'measurable ETA'],
-      ),
-      QuizChallenge(
-        cue: 'Use the metric: “${profile.dashboardMetric}” with leadership tone.',
-        good: 'Net-net: ${profile.dashboardMetric}. We’re executing a mitigation plan and will provide a revised timeline within the hour.',
-        synonyms: ['net-net', 'mitigation plan', 'revised timeline'],
-      ),
-      QuizChallenge(
-        cue: 'Replace apology with ownership.',
-        good: 'We own the outcome. We identified the driver and we’re stabilizing performance now.',
-        synonyms: ['own the outcome', 'identified the driver', 'stabilizing'],
-      ),
-    ];
+    final challenges = resolver.quizPrompts();
 
     final current = challenges[promptIdx];
     final nextReview = streak >= 3
-        ? 'in 3 days'
+        ? context.l10n.reviewInDays(3)
         : streak == 2
-            ? 'in 24 hours'
+            ? context.l10n.reviewInHours(24)
             : streak == 1
-                ? 'in 6 hours'
-                : 'in 30 minutes';
+                ? context.l10n.reviewInHours(6)
+                : context.l10n.reviewInMinutes(30);
 
     return ScreenShell(
-      title: 'Speed Synonyms',
+      title: context.l10n.quizTitle,
       left: const BackButtonWidget(),
-      right: const Pill(label: 'Stage 3/4', icon: Icons.timer_outlined),
+      right: Pill(label: context.l10n.stageLabel(3, 4), icon: Icons.timer_outlined),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Continue → Battle Card (Revision)',
+            label: context.l10n.quizContinueToRevision,
             icon: Icons.arrow_forward,
             onPressed: () => ref.read(appRouteProvider.notifier).goTo(AppRoute.revision),
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'See Paywall',
+            label: context.l10n.quizSeePaywall,
             icon: Icons.lock_outline,
             onPressed: () {
-              ref.read(paywallIntentProvider.notifier).state = const PaywallIntent(
-                feature: 'Competency Map + Pricing',
+              ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
+                feature: context.l10n.paywallFeatureCompetencyMapPricing,
                 from: AppRoute.quiz,
               );
               ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
@@ -130,17 +116,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('High-pressure retrieval', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
-                      SizedBox(height: 4),
+                    children: [
                       Text(
-                        'Find executive synonyms fast.',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        context.l10n.quizHighPressureLabel,
+                        style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
-                        'This builds a neural shortcut: the right phrase appears automatically under stress.',
-                        style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                        context.l10n.quizFindSynonymsTitle,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        context.l10n.quizFindSynonymsBody,
+                        style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                       ),
                     ],
                   ),
@@ -167,12 +156,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Pill(
-                      label: 'Streak: $streak',
+                      label: context.l10n.quizStreakLabel(streak),
                       icon: Icons.bolt,
                       variant: streak > 0 ? PillVariant.success : PillVariant.muted,
                     ),
                     Pill(
-                      label: 'Professionalism Points: $points',
+                      label: context.l10n.quizPointsLabel(points),
                       icon: Icons.workspace_premium,
                       variant: PillVariant.muted,
                     ),
@@ -182,7 +171,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Time left', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+                    Text(
+                      context.l10n.timeLeftLabel,
+                      style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                    ),
                     Text(
                       '${timeLeft}s',
                       style: TextStyle(
@@ -206,7 +198,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Prompt', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+                      Text(
+                        context.l10n.promptLabel,
+                        style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         current.cue,
@@ -219,7 +214,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Your answer', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+                    Text(
+                      context.l10n.yourAnswerLabel,
+                      style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                    ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: answerController,
@@ -229,7 +227,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color(0x26000000),
-                        hintText: 'Type your Tier 3 version…',
+                        hintText: context.l10n.quizAnswerHint,
                         hintStyle: const TextStyle(fontSize: 13, color: AppTokens.textMuted),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppTokens.radiusMd),
@@ -256,10 +254,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(AppTokens.radiusMd),
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Text(
-                              'Submit',
-                              style: TextStyle(fontWeight: FontWeight.w600, color: AppTokens.zinc950),
+                              context.l10n.submitLabel,
+                              style: const TextStyle(fontWeight: FontWeight.w600, color: AppTokens.zinc950),
                             ),
                           ),
                         ),
@@ -281,10 +279,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                             borderRadius: BorderRadius.circular(AppTokens.radiusMd),
                             border: Border.all(color: AppTokens.borderLight),
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Text(
-                              'Show best answer',
-                              style: TextStyle(fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                              context.l10n.showBestAnswerLabel,
+                              style: const TextStyle(fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                             ),
                           ),
                         ),
@@ -313,7 +311,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  result!.ok ? 'Correct' : 'Upgrade needed',
+                                  result!.ok ? context.l10n.quizCorrectLabel : context.l10n.quizUpgradeNeededLabel,
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 4),
@@ -323,7 +321,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'SRS: this card returns $nextReview',
+                                  context.l10n.srsReturnLabel(nextReview),
                                   style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                                 ),
                               ],
@@ -337,9 +335,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   borderRadius: BorderRadius.circular(AppTokens.radiusMd),
                                   border: Border.all(color: AppTokens.borderLight),
                                 ),
-                                child: const Text(
-                                  'Next',
-                                  style: TextStyle(fontSize: 12, color: AppTokens.textPrimary),
+                                child: Text(
+                                  context.l10n.nextLabel,
+                                  style: const TextStyle(fontSize: 12, color: AppTokens.textPrimary),
                                 ),
                               ),
                             ),
@@ -347,7 +345,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Haptic simulation: ${result!.haptic == 'correct' ? '✔ micro-bounce' : '⚠ pulse'}',
+                          context.l10n.hapticSimulationLabel(
+                            result!.haptic == 'correct' ? context.l10n.hapticMicroBounce : context.l10n.hapticPulse,
+                          ),
                           style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                         ),
                       ],
@@ -364,17 +364,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               end: Alignment.bottomCenter,
               colors: [Color(0x14000000), Color(0x00000000)],
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Why this matters',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.quizWhyThisMattersTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Retrieval under time pressure builds executive reflexes. This improves retention and boosts conversion by making progress feel tangible.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.quizWhyThisMattersBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -384,25 +384,26 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     );
   }
 
-  void submit(QuizChallenge current) {
+  void submit(QuizPrompt current) {
     if (answer.trim().isEmpty) return;
     final lower = answer.toLowerCase();
     final hits = current.synonyms.where((syn) => lower.contains(syn.toLowerCase())).length;
     final ok = hits >= (current.synonyms.length * 0.6).floor().clamp(2, current.synonyms.length);
+    final feedback = ref.read(learningContentResolverProvider).quizFeedback();
     setState(() {
       if (ok) {
-        result = const QuizResult(
+        result = QuizResult(
           ok: true,
-          msg: 'Correct. Executive-grade synonym mapping detected.',
-          haptic: 'correct',
+          msg: feedback.correctMessage,
+          haptic: feedback.correctHaptic,
         );
         streak += 1;
         points += 16;
       } else {
-        result = const QuizResult(
+        result = QuizResult(
           ok: false,
-          msg: 'Not quite. Aim for connectors + measurable commitments.',
-          haptic: 'hesitation',
+          msg: feedback.notQuiteMessage,
+          haptic: feedback.notQuiteHaptic,
         );
         streak = 0;
         points = (points - 8).clamp(0, 999);
@@ -411,22 +412,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   void next() {
+    final promptCount = ref.read(learningContentResolverProvider).quizPrompts().length;
     setState(() {
       result = null;
       answer = '';
       answerController.clear();
       timeLeft = 20;
-      promptIdx = (promptIdx + 1) % 3;
+      promptIdx = (promptIdx + 1) % promptCount;
     });
   }
-}
-
-class QuizChallenge {
-  QuizChallenge({required this.cue, required this.good, required this.synonyms});
-
-  final String cue;
-  final String good;
-  final List<String> synonyms;
 }
 
 class QuizResult {

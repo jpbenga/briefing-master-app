@@ -13,10 +13,11 @@ import '../../../core/ui/pills.dart';
 import '../../../core/ui/progress.dart';
 import '../../../core/ui/screen_shell.dart';
 import '../../../core/ui/toasts.dart';
+import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/learning/learning_content_resolver.dart';
 import '../../monetization/logic/entitlements.dart';
 import '../widgets/audio_visualizer.dart';
 import '../widgets/toast_stream.dart';
-import 'learning_data.dart';
 
 class SpeakingScreen extends ConsumerStatefulWidget {
   const SpeakingScreen({super.key});
@@ -51,7 +52,7 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
     super.dispose();
   }
 
-  void startSpeaking(UserProfile profile) {
+  void startSpeaking() {
     setState(() {
       transcript = '';
       upgrade = null;
@@ -59,14 +60,10 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
     });
     ref.read(speakingActiveProvider.notifier).state = true;
 
-    final pool = semanticPools[detectIntentCluster(transcript)] ?? semanticPools['Sharing bad news']!;
-    final candidates = [
-      'So, uh, we have a problem. ${profile.dashboardMetric}. I\'m looking into it and we will fix it soon.',
-      'First, ${profile.dashboardMetric}. Second, we identified two drivers. Therefore, we are executing a mitigation plan and will provide a revised timeline within the hour.',
-      'Net-net: ${profile.dashboardMetric}. My recommendation is to stabilize churn risk, quantify impact, and align on corrective actions today.',
-      '${pickRandom(List<String>.from(pool['connectors'] as List))}: the variance is material. We’re investigating root cause and confirming corrective actions with a measurable ETA.',
-    ];
-    final seed = pickRandom(candidates);
+    final resolver = ref.read(learningContentResolverProvider);
+    final currentCluster = resolver.detectIntentCluster(transcript);
+    final candidates = resolver.speakingSeedCandidates(currentCluster);
+    final seed = resolver.pickRandomSeed(candidates);
     var idx = 0;
     transcriptTimer?.cancel();
     transcriptTimer = Timer.periodic(const Duration(milliseconds: 120), (timer) {
@@ -90,33 +87,35 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
     final hasPremium = ref.watch(hasPremiumProvider);
+    final resolver = ref.watch(learningContentResolverProvider);
 
-    final currentCluster = detectIntentCluster(transcript);
-    final scoreValue = computeSophisticationScore(transcript);
+    final currentCluster = resolver.detectIntentCluster(transcript);
+    final scoreValue = resolver.computeSophisticationScore(transcript);
 
     final professionalism = scoreValue >= 78
-        ? (label: 'Executive', icon: Icons.workspace_premium, variant: PillVariant.success)
+        ? (label: context.l10n.professionalismExecutive, icon: Icons.workspace_premium, variant: PillVariant.success)
         : scoreValue >= 56
-            ? (label: 'Professional', icon: Icons.verified_user_outlined, variant: PillVariant.muted)
-            : (label: 'Safe', icon: Icons.warning_amber_rounded, variant: PillVariant.warn);
+            ? (label: context.l10n.professionalismProfessional, icon: Icons.verified_user_outlined, variant: PillVariant.muted)
+            : (label: context.l10n.professionalismSafe, icon: Icons.warning_amber_rounded, variant: PillVariant.warn);
 
-    final pool = semanticPools[currentCluster] ?? semanticPools['Sharing bad news']!;
+    final pool = resolver.clusterContent(currentCluster);
+    final prompt = resolver.speakingPrompt();
 
     return Stack(
       children: [
         ToastOverlay(items: toasts, onClear: (id) => setState(() => toasts = toasts.where((t) => t.id != id).toList())),
         ScreenShell(
-          title: 'Focus Mode',
+          title: context.l10n.speakingTitle,
           left: const BackButtonWidget(),
           right: Pill(
-            label: hasPremium ? 'Premium coach' : 'Coach locked',
+            label: hasPremium ? context.l10n.premiumCoachLabel : context.l10n.coachLockedLabel,
             icon: hasPremium ? Icons.mic : Icons.lock_outline,
             variant: hasPremium ? PillVariant.success : PillVariant.warn,
           ),
           footer: Column(
             children: [
               AppPrimaryButton(
-                label: 'Continue → Speed Synonyms (Quiz)',
+                label: context.l10n.speakingContinueToQuiz,
                 icon: Icons.arrow_forward,
                 onPressed: () {
                   ref.read(modeProvider.notifier).state = AppMode.focus;
@@ -125,7 +124,7 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
               ),
               const SizedBox(height: 8),
               AppSecondaryButton(
-                label: 'Jump to Battle-Card Summary',
+                label: context.l10n.speakingJumpToBattleCard,
                 icon: Icons.arrow_forward,
                 onPressed: () => ref.read(appRouteProvider.notifier).goTo(AppRoute.revision),
               ),
@@ -146,16 +145,19 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Live briefing prompt', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
+                          Text(
+                            context.l10n.liveBriefingPromptLabel,
+                            style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
+                          ),
                           const SizedBox(height: 4),
                           Text(
-                            'Explain why ${profile.dashboardMetric} happened, and propose a recovery plan.',
+                            prompt.primary,
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Speak like leadership is listening. No apologies. Commit to action.',
-                            style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                          Text(
+                            prompt.secondary,
+                            style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                           ),
                         ],
                       ),
@@ -183,12 +185,15 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text('Voice waveform', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-                            SizedBox(height: 2),
+                          children: [
                             Text(
-                              'Audio Visualizer',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              context.l10n.voiceWaveformLabel,
+                              style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.l10n.audioVisualizerLabel,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -206,7 +211,7 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                       children: [
                         Expanded(
                           child: GestureDetector(
-                            onTap: isSpeaking ? null : () => startSpeaking(profile),
+                            onTap: isSpeaking ? null : startSpeaking,
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
@@ -216,7 +221,7 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                               ),
                               child: Center(
                                 child: Text(
-                                  isSpeaking ? 'Listening…' : 'Start speaking',
+                                  isSpeaking ? context.l10n.listeningLabel : context.l10n.startSpeakingLabel,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     color: isSpeaking ? AppTokens.textMuted : AppTokens.zinc950,
@@ -232,22 +237,24 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                             onTap: () {
                               if (!hasPremium) {
                                 ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
-                                  feature: 'Tier 3 Executive Rewrite + Live Coach',
+                                  feature: context.l10n.paywallFeatureTier3LiveCoach,
                                   from: AppRoute.speaking,
                                 );
                                 ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
                                 return;
                               }
                               stopSpeaking();
-                              final up = generateTierUpgrade(currentCluster);
+                              final up = resolver.generateTierUpgrade(currentCluster);
+                              final upgradeTitle = resolver.upgradeToastTitle();
+                              final upgradeBody = resolver.upgradeToastBody();
                               setState(() {
                                 upgrade = up;
                                 toasts = [
                                   ToastMessage(
                                     id: '${DateTime.now().millisecondsSinceEpoch}-upgrade',
                                     type: ToastType.tip,
-                                    title: 'Upgrade Ready',
-                                    body: 'Your Tier 3 rewrite is prepared. Apply it for the Aha moment.',
+                                    title: upgradeTitle,
+                                    body: upgradeBody,
                                   ),
                                   ...toasts,
                                 ];
@@ -262,7 +269,9 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                               ),
                               child: Center(
                                 child: Text(
-                                  hasPremium ? 'Generate Upgrade' : 'Unlock Tier 3 (Premium)',
+                                  hasPremium
+                                      ? context.l10n.generateUpgradeLabel
+                                      : context.l10n.unlockTier3PremiumLabel,
                                   style: const TextStyle(fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                                 ),
                               ),
@@ -283,18 +292,24 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Streaming transcript', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-                            SizedBox(height: 2),
                             Text(
-                              'What you’re saying',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              context.l10n.streamingTranscriptLabel,
+                              style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.l10n.whatYoureSayingLabel,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
-                        Pill(label: 'Intent: $currentCluster', icon: Icons.layers_outlined),
+                        Pill(
+                          label: context.l10n.intentPillLabel(resolver.clusterLabel(currentCluster)),
+                          icon: Icons.layers_outlined,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -302,7 +317,7 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                       constraints: const BoxConstraints(minHeight: 64),
                       child: Text(
                         transcript.isEmpty
-                            ? 'Tap “Start speaking” to simulate live meeting talk.'
+                            ? context.l10n.speakingEmptyTranscriptHint
                             : '$transcript${isSpeaking ? '|' : ''}',
                         style: TextStyle(
                           fontSize: 12,
@@ -315,7 +330,10 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Sophistication Score', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+                        Text(
+                          context.l10n.sophisticationScoreLabel,
+                          style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                        ),
                         Text(
                           '$scoreValue/100',
                           style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
@@ -325,9 +343,9 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                     const SizedBox(height: 6),
                     ProgressBarWidget(value: scoreValue.toDouble()),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Not a pass/fail. We measure executive clarity, structure, and commitment.',
-                      style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                    Text(
+                      context.l10n.speakingScoreExplanation,
+                      style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                     ),
                   ],
                 ),
@@ -340,35 +358,42 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
+                      children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Tier upgrades', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-                            SizedBox(height: 2),
                             Text(
-                              'Executive rewrite path',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              context.l10n.tierUpgradesLabel,
+                              style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.l10n.executiveRewritePathLabel,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
-                        Pill(label: 'Aha Moment', icon: Icons.workspace_premium, variant: PillVariant.success),
+                        Pill(
+                          label: context.l10n.ahaMomentLabel,
+                          icon: Icons.workspace_premium,
+                          variant: PillVariant.success,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     if (upgrade == null)
                       Text(
                         hasPremium
-                            ? 'Generate the Tier 3 rewrite. This is the first time the user hears themselves as an Executive.'
-                            : 'Tier 3 rewrites are Premium. In Free, you can practice speaking + quiz, but executive rewrite is locked.',
+                            ? context.l10n.generateTier3Helper
+                            : context.l10n.tier3LockedHelper,
                         style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                       )
                     else ...[
-                      _UpgradeBlock(label: 'Tier 2 (Professional)', text: upgrade!.tier2),
+                      _UpgradeBlock(label: context.l10n.tier2ProfessionalLabel, text: upgrade!.tier2),
                       const SizedBox(height: 8),
                       if (hasPremium)
                         _UpgradeBlock(
-                          label: 'Tier 3 (Executive)',
+                          label: context.l10n.tier3ExecutiveLabel,
                           text: upgrade!.tier3,
                           strong: true,
                         )
@@ -386,9 +411,9 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Tier 3 (Executive) — Locked',
-                                      style: TextStyle(fontSize: 11, color: Color(0xFFFDE68A)),
+                                    Text(
+                                      context.l10n.tier3ExecutiveLockedLabel,
+                                      style: const TextStyle(fontSize: 11, color: Color(0xFFFDE68A)),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
@@ -406,20 +431,20 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                               GestureDetector(
                                 onTap: () {
                                   ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
-                                    feature: 'Tier 3 Executive Rewrite',
+                                    feature: context.l10n.paywallFeatureTier3Rewrite,
                                     from: AppRoute.speaking,
                                   );
                                   ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
                                 },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(AppTokens.radiusMd),
-                                  ),
-                                  child: const Text(
-                                    'Unlock',
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.zinc950),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                                    ),
+                                  child: Text(
+                                    context.l10n.unlockLabel,
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.zinc950),
                                   ),
                                 ),
                               ),
@@ -443,15 +468,15 @@ class _SpeakingScreenState extends ConsumerState<SpeakingScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Suggested connectors',
-                            style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                          Text(
+                            context.l10n.suggestedConnectorsLabel,
+                            style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
                           ),
                           const SizedBox(height: 6),
                           Wrap(
                             spacing: 6,
                             runSpacing: 6,
-                            children: List<String>.from(pool['connectors'] as List)
+                            children: pool.connectors
                                 .map(
                                   (connector) => Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

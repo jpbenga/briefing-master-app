@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import '../i18n/l10n_ext.dart';
 
 class ToastMessage {
   const ToastMessage({
@@ -108,9 +109,9 @@ class _ToastCard extends StatelessWidget {
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: onClear,
-                child: const Text(
-                  '✕',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.closeSymbol,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppTokens.textMuted,
                   ),

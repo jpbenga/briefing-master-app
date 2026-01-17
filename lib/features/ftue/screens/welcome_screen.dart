@@ -9,6 +9,10 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/i18n/ui_locale_provider.dart';
+import '../../../core/i18n/learning_locale_provider.dart';
+import '../../../core/learning/language_catalog.dart';
 
 class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
@@ -16,7 +20,7 @@ class WelcomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ScreenShell(
-      title: 'The Briefing Master',
+      title: context.l10n.welcomeTitle,
       left: Container(
         width: 36,
         height: 36,
@@ -27,14 +31,11 @@ class WelcomeScreen extends ConsumerWidget {
         ),
         child: const Icon(Icons.auto_awesome, size: 18, color: Color(0xFF67E8F9)),
       ),
-      right: const Pill(
-        label: 'Private • RLS',
-        icon: Icons.verified_user_outlined,
-      ),
+      right: const _LocaleSelectors(),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Start your Executive Upgrade',
+            label: context.l10n.welcomeStartCta,
             icon: Icons.arrow_forward,
             onPressed: () {
               ref.read(modeProvider.notifier).state = AppMode.deepWork;
@@ -43,22 +44,22 @@ class WelcomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'View Paywall (Pricing)',
+            label: context.l10n.welcomeViewPaywall,
             icon: Icons.lock_outline,
             onPressed: () {
               ref.read(modeProvider.notifier).state = AppMode.deepWork;
-              ref.read(paywallIntentProvider.notifier).state = const PaywallIntent(
-                feature: 'Competency Map + Pricing',
+              ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
+                feature: context.l10n.paywallFeatureCompetencyMapPricing,
                 from: AppRoute.welcome,
               );
               ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
             },
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Frictionless onboarding • Immediate “Aha” moment • Built for retention',
+          Text(
+            context.l10n.welcomeFooterTagline,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+            style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
           ),
         ],
       ),
@@ -72,12 +73,12 @@ class WelcomeScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'From Meeting Anxiety → Performance Flow',
+                            context.l10n.welcomeHeroTitle,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -86,7 +87,7 @@ class WelcomeScreen extends ConsumerWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Prime. Speak. Drill. Anchor. Repeat.',
+                            context.l10n.welcomeHeroSubtitle,
                             style: TextStyle(fontSize: 12, color: AppTokens.textSecondary),
                           ),
                         ],
@@ -105,13 +106,13 @@ class WelcomeScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Row(
+                Row(
                   children: [
-                    Expanded(child: _MiniStat(title: 'Sophistication', value: '+38', hint: 'Tier upgrades')),
-                    SizedBox(width: 8),
-                    Expanded(child: _MiniStat(title: 'Filler control', value: '-62%', hint: 'Hesitations')),
-                    SizedBox(width: 8),
-                    Expanded(child: _MiniStat(title: 'LTV driver', value: 'Streak', hint: 'Dopamine loop')),
+                    Expanded(child: _MiniStat(title: context.l10n.miniStatSophistication, value: '+38', hint: context.l10n.miniStatTierUpgrades)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MiniStat(title: context.l10n.miniStatFillerControl, value: '-62%', hint: context.l10n.miniStatHesitations)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _MiniStat(title: context.l10n.miniStatLtvDriver, value: context.l10n.miniStatStreak, hint: context.l10n.miniStatDopamineLoop)),
                   ],
                 ),
               ],
@@ -126,17 +127,20 @@ class WelcomeScreen extends ConsumerWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Your unfair advantage', style: TextStyle(fontSize: 12, color: AppTokens.textSecondary)),
-                SizedBox(height: 4),
+              children: [
                 Text(
-                  'Personalized training using your CV + real dashboards.',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.welcomeAdvantageLabel,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
-                  'We don’t teach “random English.” We teach your English — for your meetings, your metrics, your pressure.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.welcomeAdvantageTitle,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.welcomeAdvantageBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -146,25 +150,120 @@ class WelcomeScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: _ModeButton(
-                  label: 'Deep Work',
+                  label: context.l10n.modeDeepWork,
                   onTap: () => ref.read(modeProvider.notifier).state = AppMode.deepWork,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _ModeButton(
-                  label: 'Adrenaline',
+                  label: context.l10n.modeAdrenaline,
                   onTap: () => ref.read(modeProvider.notifier).state = AppMode.adrenaline,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _ModeButton(
-                  label: 'Focus',
+                  label: context.l10n.modeFocus,
                   onTap: () => ref.read(modeProvider.notifier).state = AppMode.focus,
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocaleSelectors extends ConsumerWidget {
+  const _LocaleSelectors();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final uiLocale = ref.watch(uiLocaleProvider);
+    final learningLocale = ref.watch(learningLocaleProvider);
+    final languages = LanguageCatalog.supported;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Pill(
+          label: context.l10n.privateRlsLabel,
+          icon: Icons.verified_user_outlined,
+        ),
+        const SizedBox(height: 6),
+        _LocaleDropdown(
+          label: context.l10n.appLanguageLabel,
+          value: uiLocale.languageCode,
+          onChanged: (value) {
+            if (value != null) {
+              ref.read(uiLocaleProvider.notifier).updateLocale(Locale(value));
+            }
+          },
+          items: languages.map(_languageLabel).toList(),
+        ),
+        const SizedBox(height: 6),
+        _LocaleDropdown(
+          label: context.l10n.learningLanguageLabel,
+          value: learningLocale.languageCode,
+          onChanged: (value) {
+            if (value != null) {
+              ref.read(learningLocaleProvider.notifier).updateLocale(Locale(value));
+            }
+          },
+          items: languages.map(_languageLabel).toList(),
+        ),
+      ],
+    );
+  }
+
+  DropdownMenuItem<String> _languageLabel(LearningLanguage language) {
+    final label = [
+      if (language.flagEmoji != null) language.flagEmoji,
+      language.nameNative,
+    ].join(' ');
+    return DropdownMenuItem<String>(
+      value: language.code,
+      child: Text(label),
+    );
+  }
+}
+
+class _LocaleDropdown extends StatelessWidget {
+  const _LocaleDropdown({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    required this.items,
+  });
+
+  final String label;
+  final String value;
+  final ValueChanged<String?> onChanged;
+  final List<DropdownMenuItem<String>> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTokens.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+        border: Border.all(color: AppTokens.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 10, color: AppTokens.textMuted)),
+          DropdownButton<String>(
+            value: value,
+            isDense: true,
+            items: items,
+            onChanged: onChanged,
+            dropdownColor: AppTokens.zinc900,
+            style: const TextStyle(fontSize: 11, color: AppTokens.textPrimary),
+            underline: const SizedBox.shrink(),
           ),
         ],
       ),

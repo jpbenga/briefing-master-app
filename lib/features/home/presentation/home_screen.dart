@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -7,22 +9,19 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('The Briefing Master'),
+        title: Text(context.l10n.appTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
-              'Coach IA vocal pour la prise de parole professionnelle.',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              context.l10n.homeTagline,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 16),
-            Text(
-              'Cette base Flutter prépare les modules métiers, la navigation et '
-              'les thèmes pour l\'expérience temps réel.',
-            ),
+            const SizedBox(height: 16),
+            Text(context.l10n.homeDescription),
           ],
         ),
       ),

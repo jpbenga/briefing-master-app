@@ -11,6 +11,9 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/i18n/learning_locale_provider.dart';
+import '../../../core/learning/language_catalog.dart';
 import '../../monetization/logic/entitlements.dart';
 
 class UploadScreen extends ConsumerStatefulWidget {
@@ -24,17 +27,29 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   late TextEditingController companyController;
   late TextEditingController metricController;
   late TextEditingController targetController;
-  String role = 'Support N2';
+  String role = '';
   bool uploading = false;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
+    companyController = TextEditingController();
+    metricController = TextEditingController();
+    targetController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
     final profile = ref.read(userProfileProvider);
-    role = profile.role;
-    companyController = TextEditingController(text: profile.company);
-    metricController = TextEditingController(text: profile.dashboardMetric);
-    targetController = TextEditingController(text: profile.target);
+    final roleOptions = _roleOptions(context);
+    role = roleOptions.contains(profile.role) ? profile.role : roleOptions.first;
+    companyController.text = profile.company;
+    metricController.text = profile.dashboardMetric;
+    targetController.text = profile.target;
+    _initialized = true;
   }
 
   @override
@@ -48,21 +63,23 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   @override
   Widget build(BuildContext context) {
     final hasPremium = ref.watch(hasPremiumProvider);
+    final learningLocale = ref.watch(learningLocaleProvider);
+    final learningLanguage = LanguageCatalog.byCode(learningLocale.languageCode);
 
     return ScreenShell(
-      title: 'Personalization',
+      title: context.l10n.uploadTitle,
       left: const BackButtonWidget(),
-      right: const Pill(label: 'RAG Upload', icon: Icons.upload_file_outlined),
+      right: Pill(label: context.l10n.uploadRagLabel, icon: Icons.upload_file_outlined),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: uploading ? 'Analyzing… Hydrating context' : 'Upload & Hydrate My Context',
+            label: uploading ? context.l10n.uploadAnalyzingLabel : context.l10n.uploadHydrateCta,
             icon: Icons.upload,
             disabled: uploading,
             onPressed: () async {
               if (!hasPremium) {
                 ref.read(paywallIntentProvider.notifier).state = PaywallIntent(
-                  feature: 'Personalization (CV/Dashboard RAG)',
+                  feature: context.l10n.paywallFeaturePersonalization,
                   from: AppRoute.upload,
                 );
                 ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall);
@@ -77,7 +94,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                 company: companyController.text,
                 dashboardMetric: metricController.text,
                 target: targetController.text,
-                language: 'English',
+                language: learningLanguage?.nameEnglish ?? learningLocale.languageCode,
               );
               if (mounted) {
                 setState(() => uploading = false);
@@ -88,17 +105,17 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
           const SizedBox(height: 6),
           Column(
             children: [
-              const Text(
-                'Simulated pipeline: Supabase Storage → NestJS gateway → Python RAG → pgvector',
+              Text(
+                context.l10n.uploadPipelineNote,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
               ),
               if (!hasPremium)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 4),
                   child: Text(
-                    'Locked in Free. Upgrade to unlock personalization.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFFFDE68A)),
+                    context.l10n.uploadLockedNote,
+                    style: const TextStyle(fontSize: 11, color: Color(0xFFFDE68A)),
                   ),
                 ),
             ],
@@ -111,32 +128,32 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
             backgroundColor: AppTokens.surfaceGlass,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Upload simulation', style: TextStyle(fontSize: 12, color: AppTokens.textSecondary)),
-                SizedBox(height: 6),
+              children: [
                 Text(
-                  'Make the app feel like it already “knows your career.”',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.uploadSimulationLabel,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'This is not a form — it’s an investment trigger. The moment you input your reality, your brain commits.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.uploadSimulationTitle,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.uploadSimulationBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           _Field(
-            label: 'Your role',
+            label: context.l10n.uploadRoleLabel,
             child: DropdownButtonFormField<String>(
               value: role,
-              items: const [
-                DropdownMenuItem(value: 'Support N2', child: Text('Support N2')),
-                DropdownMenuItem(value: 'Project Manager', child: Text('Project Manager')),
-                DropdownMenuItem(value: 'Sales Executive', child: Text('Sales Executive')),
-                DropdownMenuItem(value: 'Engineering Manager', child: Text('Engineering Manager')),
-              ],
+              items: _roleOptions(context)
+                  .map((option) => DropdownMenuItem(value: option, child: Text(option)))
+                  .toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() => role = value);
@@ -148,28 +165,28 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
           ),
           const SizedBox(height: 12),
           _Field(
-            label: 'Company context',
+            label: context.l10n.uploadCompanyLabel,
             child: TextField(
               controller: companyController,
-              decoration: _fieldDecoration(hintText: 'e.g., Northstar Systems'),
+              decoration: _fieldDecoration(hintText: context.l10n.uploadCompanyHint),
               style: const TextStyle(fontSize: 13, color: AppTokens.textPrimary),
             ),
           ),
           const SizedBox(height: 12),
           _Field(
-            label: 'Dashboard metric (high-stakes reality)',
+            label: context.l10n.uploadMetricLabel,
             child: TextField(
               controller: metricController,
-              decoration: _fieldDecoration(hintText: 'e.g., Q3 revenue down 20%'),
+              decoration: _fieldDecoration(hintText: context.l10n.uploadMetricHint),
               style: const TextStyle(fontSize: 13, color: AppTokens.textPrimary),
             ),
           ),
           const SizedBox(height: 12),
           _Field(
-            label: 'Your target identity',
+            label: context.l10n.uploadTargetLabel,
             child: TextField(
               controller: targetController,
-              decoration: _fieldDecoration(hintText: 'e.g., Sound like an Executive in crisis calls'),
+              decoration: _fieldDecoration(hintText: context.l10n.uploadTargetHint),
               style: const TextStyle(fontSize: 13, color: AppTokens.textPrimary),
             ),
           ),
@@ -183,15 +200,15 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'What changes after hydration?',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                Text(
+                  context.l10n.uploadChangesTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
                 const SizedBox(height: 8),
-                _HydrationItem(text: 'Scenarios reference your role, your metrics, your pressure.'),
-                _HydrationItem(text: 'Tier 3 rewrites adopt executive tone aligned to your domain.'),
+                _HydrationItem(text: context.l10n.uploadChangeScenario),
+                _HydrationItem(text: context.l10n.uploadChangeTier3),
                 _HydrationItem(
-                  text: 'Feedback becomes contextual, not generic. Higher perceived value → higher conversion.',
+                  text: context.l10n.uploadChangeFeedback,
                 ),
               ],
             ),
@@ -221,6 +238,15 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
+  }
+
+  List<String> _roleOptions(BuildContext context) {
+    return [
+      context.l10n.roleSupportN2,
+      context.l10n.roleProjectManager,
+      context.l10n.roleSalesExecutive,
+      context.l10n.roleEngineeringManager,
+    ];
   }
 }
 
