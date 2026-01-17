@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/tokens.dart';
 
 class FlipCardWidget extends StatefulWidget {
@@ -70,8 +71,8 @@ class _FlipCardWidgetState extends State<FlipCardWidget> with SingleTickerProvid
                     alignment: Alignment.center,
                     transform: Matrix4.rotationX(pi),
                     child: _FlipFace(
-                      title: 'Upgrade suggestion',
-                      subtitle: 'Executive polish',
+                      title: context.l10n.flipUpgradeSuggestion,
+                      subtitle: context.l10n.flipExecutivePolish,
                       body: widget.back,
                       isFront: false,
                     ),
@@ -121,7 +122,10 @@ class _FlipFace extends StatelessWidget {
                   ),
                 ],
               ),
-              const Text('tap to flip', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+              Text(
+                context.l10n.flipTapToFlip,
+                style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+              ),
             ],
           ),
           const SizedBox(height: 8),

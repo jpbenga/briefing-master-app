@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/routing/app_router.dart';
@@ -7,6 +8,10 @@ import '../core/theme/app_theme.dart';
 import '../core/theme/tokens.dart';
 import '../core/ui/mobile_frame.dart';
 import '../core/ui/transitions.dart';
+import '../core/i18n/app_locales.dart';
+import '../core/i18n/l10n_ext.dart';
+import '../core/i18n/ui_locale_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../features/ftue/screens/onboarding_screen.dart';
 import '../features/ftue/screens/upload_screen.dart';
 import '../features/ftue/screens/welcome_screen.dart';
@@ -22,11 +27,24 @@ class BriefingMasterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'The Briefing Master',
-      theme: AppTheme.dark(),
-      home: const AppShell(),
-      debugShowCheckedModeBanner: false,
+    return Consumer(
+      builder: (context, ref, child) {
+        final locale = ref.watch(uiLocaleProvider);
+        return MaterialApp(
+          onGenerateTitle: (context) => context.l10n.appTitle,
+          theme: AppTheme.dark(),
+          home: const AppShell(),
+          debugShowCheckedModeBanner: false,
+          locale: locale,
+          supportedLocales: AppLocales.supportedUiLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+        );
+      },
     );
   }
 }

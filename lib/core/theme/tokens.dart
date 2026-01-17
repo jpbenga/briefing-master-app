@@ -6,12 +6,10 @@ enum AppMode { deepWork, adrenaline, focus }
 
 class AppModeStyle {
   const AppModeStyle({
-    required this.name,
     required this.badgeColor,
     required this.glowGradient,
   });
 
-  final String name;
   final Color badgeColor;
   final LinearGradient glowGradient;
 }
@@ -75,7 +73,6 @@ class AppTokens {
 
   static const Map<AppMode, AppModeStyle> modes = {
     AppMode.deepWork: AppModeStyle(
-      name: 'Deep Work',
       badgeColor: Color(0xFF27272A),
       glowGradient: LinearGradient(
         begin: Alignment.topCenter,
@@ -84,7 +81,6 @@ class AppTokens {
       ),
     ),
     AppMode.adrenaline: AppModeStyle(
-      name: 'Adrenaline',
       badgeColor: Color(0x33F43F5E),
       glowGradient: LinearGradient(
         begin: Alignment.topCenter,
@@ -93,7 +89,6 @@ class AppTokens {
       ),
     ),
     AppMode.focus: AppModeStyle(
-      name: 'Focus',
       badgeColor: Color(0x336366F1),
       glowGradient: LinearGradient(
         begin: Alignment.topCenter,

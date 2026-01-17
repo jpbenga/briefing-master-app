@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../routing/app_router.dart';
 import '../theme/tokens.dart';
 import '../../app/app_state.dart';
+import '../i18n/l10n_ext.dart';
 
 class MobileFrame extends ConsumerWidget {
   const MobileFrame({super.key, required this.child});
@@ -125,23 +126,23 @@ class _StatusBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              const Text(
-                'Live',
-                style: TextStyle(fontSize: 11, color: AppTokens.textMuted),
+              Text(
+                context.l10n.statusLive,
+                style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
               ),
             ],
           ),
-          const Row(
+          Row(
             children: [
-              Text('9:41', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-              SizedBox(width: 6),
-              Text('•', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-              SizedBox(width: 6),
-              Text('5G', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-              SizedBox(width: 6),
-              Text('•', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-              SizedBox(width: 6),
-              Text('92%', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+              Text(context.l10n.statusTime, style: const TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+              const SizedBox(width: 6),
+              const Text('•', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+              const SizedBox(width: 6),
+              Text(context.l10n.statusNetwork, style: const TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+              const SizedBox(width: 6),
+              const Text('•', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
+              const SizedBox(width: 6),
+              Text(context.l10n.statusBattery, style: const TextStyle(fontSize: 11, color: AppTokens.textMuted)),
             ],
           ),
         ],

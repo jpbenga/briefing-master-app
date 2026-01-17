@@ -8,6 +8,7 @@ import '../../../core/ui/buttons.dart';
 import '../../../core/ui/cards.dart';
 import '../../../core/ui/pills.dart';
 import '../../../core/ui/screen_shell.dart';
+import '../../../core/i18n/l10n_ext.dart';
 
 class PremiumPreviewScreen extends ConsumerWidget {
   const PremiumPreviewScreen({super.key});
@@ -15,19 +16,19 @@ class PremiumPreviewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ScreenShell(
-      title: 'Premium Preview',
+      title: context.l10n.premiumPreviewTitle,
       left: const BackButtonWidget(),
-      right: const Pill(label: 'Premium', icon: Icons.workspace_premium, variant: PillVariant.success),
+      right: Pill(label: context.l10n.premiumLabel, icon: Icons.workspace_premium, variant: PillVariant.success),
       footer: Column(
         children: [
           AppPrimaryButton(
-            label: 'Start another briefing',
+            label: context.l10n.premiumPreviewStartAnother,
             icon: Icons.arrow_forward,
             onPressed: () => ref.read(appRouteProvider.notifier).goTo(AppRoute.priming),
           ),
           const SizedBox(height: 8),
           AppSecondaryButton(
-            label: 'Back to Paywall',
+            label: context.l10n.premiumPreviewBackToPaywall,
             onPressed: () => ref.read(appRouteProvider.notifier).goTo(AppRoute.paywall),
           ),
         ],
@@ -40,19 +41,22 @@ class PremiumPreviewScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [Color(0x1A06B6D4), Color(0x00000000)],
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('What “magic” feels like', style: TextStyle(fontSize: 12, color: AppTokens.textMuted)),
-                SizedBox(height: 4),
                 Text(
-                  'Your AI coach becomes a real-time copilot.',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.premiumPreviewMagicLabel,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textMuted),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
-                  'Whisper → transcription. Python → intent + sophistication scoring. NestJS → orchestration. Supabase → secure memory.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.premiumPreviewMagicTitle,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.premiumPreviewMagicBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -64,44 +68,47 @@ class PremiumPreviewScreen extends ConsumerWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Premium modules', style: TextStyle(fontSize: 11, color: AppTokens.textMuted)),
-                        SizedBox(height: 2),
                         Text(
-                          'Briefing Library',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          context.l10n.premiumModulesLabel,
+                          style: const TextStyle(fontSize: 11, color: AppTokens.textMuted),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.premiumBriefingLibraryTitle,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
-                    Pill(label: 'Feature-first', icon: Icons.layers_outlined),
+                    Pill(label: context.l10n.featureFirstLabel, icon: Icons.layers_outlined),
                   ],
                 ),
                 const SizedBox(height: 10),
-                const _LibraryItem(
-                  title: 'Crisis Sprint',
-                  tag: 'One-shot pack',
-                  desc: 'High-pressure calls, executive rewrites, rapid SRS.',
+                _LibraryItem(
+                  title: context.l10n.libraryItemCrisisTitle,
+                  tag: context.l10n.libraryItemOneShotTag,
+                  desc: context.l10n.libraryItemCrisisDesc,
                 ),
                 const SizedBox(height: 8),
-                const _LibraryItem(
-                  title: 'Interview Sprint',
-                  tag: 'One-shot pack',
-                  desc: 'STAR answers, persuasion, leadership presence.',
+                _LibraryItem(
+                  title: context.l10n.libraryItemInterviewTitle,
+                  tag: context.l10n.libraryItemOneShotTag,
+                  desc: context.l10n.libraryItemInterviewDesc,
                 ),
                 const SizedBox(height: 8),
-                const _LibraryItem(
-                  title: 'Standup Mastery',
-                  tag: 'Premium',
-                  desc: 'Crisp updates, blockers, timelines, accountability.',
+                _LibraryItem(
+                  title: context.l10n.libraryItemStandupTitle,
+                  tag: context.l10n.premiumLabel,
+                  desc: context.l10n.libraryItemStandupDesc,
                 ),
                 const SizedBox(height: 8),
-                const _LibraryItem(
-                  title: 'Negotiation Room',
-                  tag: 'Premium',
-                  desc: 'Anchoring, framing, concessions, closing language.',
+                _LibraryItem(
+                  title: context.l10n.libraryItemNegotiationTitle,
+                  tag: context.l10n.premiumLabel,
+                  desc: context.l10n.libraryItemNegotiationDesc,
                 ),
               ],
             ),
@@ -113,17 +120,17 @@ class PremiumPreviewScreen extends ConsumerWidget {
               end: Alignment.bottomCenter,
               colors: [Color(0x14000000), Color(0x00000000)],
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Retention plateau strategy',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
+                  context.l10n.premiumRetentionTitle,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTokens.textPrimary),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'After 2–3 weeks, motivation dips. We re-trigger with new roles, scenario packs, streak boosters, and competency milestones.',
-                  style: TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
+                  context.l10n.premiumRetentionBody,
+                  style: const TextStyle(fontSize: 12, color: AppTokens.textSecondary, height: 1.4),
                 ),
               ],
             ),
